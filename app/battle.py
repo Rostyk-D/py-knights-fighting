@@ -1,8 +1,10 @@
 from typing import Dict
 from models import Knight
 
+
 def battle(knights: Dict[str, Dict]) -> Dict[str, int]:
-    knights = [Knight(**knights[name]) for name in ["lancelot", "arthur", "mordred", "red_knight"]]
+    knights = [Knight(**knights[name]) for name in
+               ["lancelot", "arthur", "mordred", "red_knight"]]
 
     for knight in knights:
         knight.prepare_for_battle()

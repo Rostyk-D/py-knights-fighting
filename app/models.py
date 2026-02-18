@@ -1,5 +1,6 @@
 from typing import List, Dict, Optional, Any
 
+
 class Knight:
     name: str
     base_power: int
@@ -48,7 +49,6 @@ class Knight:
                     setattr(self, stat, getattr(self, stat) + value)
 
     def take_damage(self, damage: int) -> None:
-        # Використовуємо точну формулу із завдання
         self.hp -= damage
         self.hp = self.hp if self.hp > 0 else 0
 
