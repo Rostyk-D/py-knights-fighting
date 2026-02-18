@@ -2,12 +2,10 @@ from typing import Dict
 from app.models import Knight
 
 
-from typing import Dict
-from models import Knight
-
-def battle(knightsConfig: Dict[str, Dict]) -> Dict[str, int]:
+def battle(knightsconfig: Dict[str, Dict]) -> Dict[str, int]:
     # Створюємо список об'єктів Knight
-    fighters = [Knight(**knightsConfig[name]) for name in ["lancelot", "arthur", "mordred", "red_knight"]]
+    fighters = [Knight(**knightsconfig[name]) for name in
+                ["lancelot", "arthur", "mordred", "red_knight"]]
 
     # Підготовка до бою
     for knight in fighters:
