@@ -151,8 +151,8 @@ class Knight:
 
 
 def battle(knights: Dict[str, Dict[str, Any]]) -> Dict[str, int]:
-    knights: List[Knight] = [Knight(**knights[name])
-                             for name in ["lancelot", "arthur", "mordred", "red_knight"]]
+    knights: List[Knight] = [Knight(**knights[name]) for name in
+                             ["lancelot", "arthur", "mordred", "red_knight"]]
 
     # Prepare knights for battle
     for knight in knights:
