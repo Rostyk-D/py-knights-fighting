@@ -1,3 +1,6 @@
+from typing import List, Dict, Optional, Any
+
+
 KNIGHTS = {
     "lancelot": {
         "name": "Lancelot",
@@ -86,129 +89,87 @@ KNIGHTS = {
 }
 
 
-def battle(knightsConfig):
-    # BATTLE PREPARATIONS:
+class Knight:
+    name: str
+    base_power: int
+    base_hp: int
+    armour: List[Dict[str, Any]]
+    weapon: Dict[str, Any]
+    potion: Optional[Dict[str, Any]]
+    hp: int
+    power: int
+    protection: int
 
-    # lancelot
-    lancelot = knightsConfig["lancelot"]
+    def __init__(
+        self,
+        name: str,
+        power: int,
+        hp: int,
+        armour: Optional[List[Dict[str, Any]]] = None,
+        weapon: Optional[Dict[str, Any]] = None,
+        potion: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        self.name = name
+        self.base_power = power
+        self.base_hp = hp
+        self.armour = armour or []
+        self.weapon = weapon or {"power": 0}
+        self.potion = potion
+        self.hp = hp
+        self.power = power
+        self.protection = 0
 
-    # apply armour
-    lancelot["protection"] = 0
-    for a in lancelot["armour"]:
-        lancelot["protection"] += a["protection"]
+    def prepare_for_battle(self) -> None:
+        self.apply_armour()
+        self.apply_weapon()
+        self.apply_potion()
 
-    # apply weapon
-    lancelot["power"] += lancelot["weapon"]["power"]
+    def apply_armour(self) -> None:
+        self.protection = sum(a.get("protection", 0) for a in self.armour)
 
-    # apply potion if exist
-    if lancelot["potion"] is not None:
-        if "power" in lancelot["potion"]["effect"]:
-            lancelot["power"] += lancelot["potion"]["effect"]["power"]
+    def apply_weapon(self) -> None:
+        self.power += self.weapon.get("power", 0)
 
-        if "protection" in lancelot["potion"]["effect"]:
-            lancelot["protection"] += lancelot["potion"]["effect"]["protection"]
+    def apply_potion(self) -> None:
+        if self.potion:
+            for stat, value in self.potion.get("effect", {}).items():
+                if hasattr(self, stat):
+                    setattr(self, stat, getattr(self, stat) + value)
 
-        if "hp" in lancelot["potion"]["effect"]:
-            lancelot["hp"] += lancelot["potion"]["effect"]["hp"]
+    def take_damage(self, damage: int) -> None:
+        actual_damage = max(0, damage - self.protection)
+        self.hp -= actual_damage
+        if self.hp < 0:
+            self.hp = 0
 
-    # arthur
-    arthur = knightsConfig["arthur"]
+    def battle_results(self) -> Dict[str, int]:
+        return {self.name: self.hp}
 
-    # apply armour
-    arthur["protection"] = 0
-    for a in arthur["armour"]:
-        arthur["protection"] += a["protection"]
-
-    # apply weapon
-    arthur["power"] += arthur["weapon"]["power"]
-
-    # apply potion if exist
-    if arthur["potion"] is not None:
-        if "power" in arthur["potion"]["effect"]:
-            arthur["power"] += arthur["potion"]["effect"]["power"]
-
-        if "protection" in arthur["potion"]["effect"]:
-            arthur["protection"] += arthur["potion"]["effect"]["protection"]
-
-        if "hp" in arthur["potion"]["effect"]:
-            arthur["hp"] += arthur["potion"]["effect"]["hp"]
-
-    # mordred
-    mordred = knightsConfig["mordred"]
-
-    # apply armour
-    mordred["protection"] = 0
-    for a in mordred["armour"]:
-        mordred["protection"] += a["protection"]
-
-    # apply weapon
-    mordred["power"] += mordred["weapon"]["power"]
-
-    # apply potion if exist
-    if mordred["potion"] is not None:
-        if "power" in mordred["potion"]["effect"]:
-            mordred["power"] += mordred["potion"]["effect"]["power"]
-
-        if "protection" in mordred["potion"]["effect"]:
-            mordred["protection"] += mordred["potion"]["effect"]["protection"]
-
-        if "hp" in mordred["potion"]["effect"]:
-            mordred["hp"] += mordred["potion"]["effect"]["hp"]
-
-    # red_knight
-    red_knight = knightsConfig["red_knight"]
-
-    # apply armour
-    red_knight["protection"] = 0
-    for a in red_knight["armour"]:
-        red_knight["protection"] += a["protection"]
-
-    # apply weapon
-    red_knight["power"] += red_knight["weapon"]["power"]
-
-    # apply potion if exist
-    if red_knight["potion"] is not None:
-        if "power" in red_knight["potion"]["effect"]:
-            red_knight["power"] += red_knight["potion"]["effect"]["power"]
-
-        if "protection" in red_knight["potion"]["effect"]:
-            red_knight["protection"] += red_knight["potion"]["effect"]["protection"]
-
-        if "hp" in red_knight["potion"]["effect"]:
-            red_knight["hp"] += red_knight["potion"]["effect"]["hp"]
-
-    # -------------------------------------------------------------------------------
-    # BATTLE:
-
-    # 1 Lancelot vs Mordred:
-    lancelot["hp"] -= mordred["power"] - lancelot["protection"]
-    mordred["hp"] -= lancelot["power"] - mordred["protection"]
-
-    # check if someone fell in battle
-    if lancelot["hp"] <= 0:
-        lancelot["hp"] = 0
-
-    if mordred["hp"] <= 0:
-        mordred["hp"] = 0
-
-    # 2 Arthur vs Red Knight:
-    arthur["hp"] -= red_knight["power"] - arthur["protection"]
-    red_knight["hp"] -= arthur["power"] - red_knight["protection"]
-
-    # check if someone fell in battle
-    if arthur["hp"] <= 0:
-        arthur["hp"] = 0
-
-    if red_knight["hp"] <= 0:
-        red_knight["hp"] = 0
-
-    # Return battle results:
-    return {
-        lancelot["name"]: lancelot["hp"],
-        arthur["name"]: arthur["hp"],
-        mordred["name"]: mordred["hp"],
-        red_knight["name"]: red_knight["hp"],
-    }
+    def __repr__(self) -> str:
+        return (f"<Knight {self.name}: HP={self.hp}, "
+                f"Power={self.power}, Protection={self.protection}>")
 
 
-print(battle(KNIGHTS))
+def battle(knights: Dict[str, Dict[str, Any]]) -> Dict[str, int]:
+    knights: List[Knight] = [Knight(**knights[name])
+                             for name in ["lancelot", "arthur", "mordred", "red_knight"]]
+
+    # Prepare knights for battle
+    for knight in knights:
+        knight.prepare_for_battle()
+
+    lancelot, arthur, mordred, red_knight = knights
+
+    # Battle sequence
+    lancelot.take_damage(mordred.power)
+    mordred.take_damage(lancelot.power)
+
+    arthur.take_damage(red_knight.power)
+    red_knight.take_damage(arthur.power)
+
+    # results
+    results: Dict[str, int] = {}
+    for knight in knights:
+        results.update(knight.battle_results())
+
+    return results
