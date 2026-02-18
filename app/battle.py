@@ -1,5 +1,5 @@
 from typing import Dict
-from models import Knight
+from app.models import Knight
 
 
 def battle(knights: Dict[str, Dict]) -> Dict[str, int]:
